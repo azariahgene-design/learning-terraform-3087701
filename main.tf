@@ -1,29 +1,12 @@
-data "aws_ami" "app_ami" {
-  most_recent = true
-
-  owners = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-2023.*-kernel-*-x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
+provider "aws" {
+  region = "us-west-2"
 }
 
 resource "aws_instance" "web" {
-  # Hardcoded Amazon Linux 2023 AMI ID for us-west-2 
+  # Hardcoded Amazon Linux 2023 AMI ID for us-west-2 (avoids data "aws_ami" lookup)
   ami           = "ami-0797582d9526acd22"
   
-  # Fixed instance type from invalid "t8i.micro" to standard "t2.micro"
+  # Standard free-tier eligible instance type
   instance_type = "t2.micro"
 
   user_data = <<-EOF
