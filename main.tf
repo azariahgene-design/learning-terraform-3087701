@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-west-2"
-}
-
 resource "aws_instance" "web" {
   # Hardcoded Amazon Linux 2023 AMI ID for us-west-2 (avoids data "aws_ami" lookup)
   ami           = "ami-0797582d9526acd22"
