@@ -15,7 +15,7 @@ data "aws_ami" "app_ami" {
 }
 
 resource "aws_instance" "web" {
-  ami           = data.aws_ami.app_ami.id
+  ami           = "ami-0c7217cdde317cfec" # Replace with a valid AMI ID for your region
   instance_type = "t3.nano"
 
   tags = {
