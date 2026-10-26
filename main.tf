@@ -20,7 +20,10 @@ data "aws_ami" "app_ami" {
 }
 
 resource "aws_instance" "web" {
-  ami           = data.aws_ami.app_ami.id
+  # Hardcoded Amazon Linux 2023 AMI ID for us-west-2 
+  ami           = "ami-0797582d9526acd22"
+  
+  # Fixed instance type from invalid "t8i.micro" to standard "t2.micro"
   instance_type = "t2.micro"
 
   user_data = <<-EOF
