@@ -1,21 +1,18 @@
-data "aws_ami" "app_ami" {
-  most_recent = true
+# The data "aws_ami" lookup was removed because it calls ec2:DescribeImages,
+# which your organization's SCP denies. The AMI ID is now passed in directly.
 
-  filter {
-    name   = "name"
-    values = ["bitnami-tomcat-*-x86_64-hvm-ebs-nami"]
+variable "ami_id" {
+  description = "Bitnami Tomcat AMI ID for your region (e.g. ami-0123456789abcdef0)"
+  type        = string
+
+  validation {
+    condition     = can(regex("^ami-[0-9a-f]{8,17}$", var.ami_id))
+    error_message = "ami_id must look like ami-0123456789abcdef0."
   }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["979382823631"] # Bitnami
 }
 
 resource "aws_instance" "web" {
-  ami           = data.aws_ami.app_ami.id
+  ami           = var.ami_id
   instance_type = "t3.nano"
 
   tags = {
