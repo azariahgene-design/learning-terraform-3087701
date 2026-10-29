@@ -1,21 +1,35 @@
-# The data "aws_ami" lookup was removed because it calls ec2:DescribeImages,
-# which your organization's SCP denies. The AMI ID is now passed in directly.
+# data "aws_ami" was removed because it calls ec2:DescribeImages,
+# which your organization's SCP denies.
+#
+# ami_id now has a default (empty), so Terraform no longer asks for it.
+# - If you set ami_id (e.g. your Bitnami Tomcat AMI), that AMI is used.
+# - If you leave it empty, the latest Amazon Linux 2023 AMI is read from
+#   the public SSM parameter (no ec2:DescribeImages needed).
 
 variable "ami_id" {
-  description = "Bitnami Tomcat AMI ID for your region (e.g. ami-0123456789abcdef0)"
+  description = "Optional AMI ID. Leave empty to use the latest Amazon Linux 2023."
   type        = string
+  default     = ""
+}
 
-  validation {
-    condition     = can(regex("^ami-[0-9a-f]{8,17}$", var.ami_id))
-    error_message = "ami_id must look like ami-0123456789abcdef0."
-  }
+data "aws_ssm_parameter" "al2023" {
+  count = var.ami_id == "" ? 1 : 0
+  name  = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+}
+
+locals {
+  ami_id = var.ami_id != "" ? var.ami_id : nonsensitive(data.aws_ssm_parameter.al2023[0].value)
 }
 
 resource "aws_instance" "web" {
-  ami           = var.ami_id
+  ami           = local.ami_id
   instance_type = "t3.nano"
 
   tags = {
     Name = "HelloWorld"
   }
+}
+
+output "ami_used" {
+  value = local.ami_id
 }
